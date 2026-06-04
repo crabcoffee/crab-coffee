@@ -954,6 +954,334 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+
+  /* ══ MORRIS PAGE ══ */
+  #morris-page { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+  #morris-page.active { display: flex; }
+
+  :root {
+    --bg: #0a0b14;
+    --surface: #10112a;
+    --indigo: #3730a3;
+    --indigo-mid: #4f46e5;
+    --indigo-light: #6366f1;
+    --purple: #7c3aed;
+    --purple-light: #a855f7;
+    --accent: #c084fc;
+    --text: #f0f0ff;
+    --muted: #8b8cb0;
+    --border: rgba(99, 102, 241, 0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* noise */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.35;
+  }
+
+  /* blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: drift 8s ease-in-out infinite alternate;
+  }
+  .blob-1 { width: 380px; height: 380px; background: rgba(79,70,229,0.13); top: 5%; left: 5%; animation-delay: 0s; }
+  .blob-2 { width: 300px; height: 300px; background: rgba(168,85,247,0.1); bottom: 10%; right: 5%; animation-delay: -3s; }
+  @keyframes drift { from { transform: translate(0,0); } to { transform: translate(25px,-15px); } }
+
+  /* ── NAV ── */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: rgba(10,11,20,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--purple), var(--indigo-mid));
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  .back-link {
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  /* ── CHAT CONTAINER ── */
+  .chat-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    overflow: hidden;
+  }
+
+  /* Morris intro header */
+  .morris-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 28px 0 20px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .morris-avatar {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--indigo-mid), var(--purple));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 24px rgba(124,58,237,0.4);
+    position: relative;
+  }
+  .morris-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; right: 2px;
+    width: 12px; height: 12px;
+    background: #22c55e;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+
+  .morris-info h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+  .morris-info p {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 300;
+  }
+
+  /* ── MESSAGES ── */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99,102,241,0.2) transparent;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); border-radius: 4px; }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    animation: msgIn 0.25s ease both;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .msg.morris .msg-avatar {
+    background: linear-gradient(135deg, var(--indigo-mid), var(--purple));
+    box-shadow: 0 0 12px rgba(124,58,237,0.3);
+  }
+  .msg.user .msg-avatar {
+    background: rgba(99,102,241,0.15);
+    border: 1px solid var(--border);
+  }
+
+  .msg-bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.93rem;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+  .msg.morris .msg-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, var(--indigo-mid), var(--purple));
+    border-bottom-right-radius: 4px;
+    color: white;
+    font-weight: 400;
+  }
+
+  /* typing indicator */
+  .typing-indicator {
+    display: none;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .typing-indicator.show { display: flex; }
+  .typing-dots {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .typing-dots span {
+    width: 7px; height: 7px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ── INPUT ── */
+  .input-area {
+    padding: 16px 0 24px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 10px 10px 18px;
+    transition: border-color 0.2s;
+  }
+  .input-row:focus-within { border-color: rgba(99,102,241,0.5); }
+
+  #chat-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 300;
+    resize: none;
+    line-height: 1.5;
+    max-height: 120px;
+    min-height: 24px;
+  }
+  #chat-input::placeholder { color: var(--muted); }
+
+  #send-btn {
+    background: linear-gradient(135deg, var(--indigo-mid), var(--purple));
+    color: white;
+    border: none;
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.15s;
+    font-size: 1rem;
+  }
+  #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .input-hint {
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 300;
+  }
+
+  /* suggestion chips */
+  .suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .chip {
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.25);
+    color: var(--indigo-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .chip:hover { background: rgba(99,102,241,0.16); border-color: rgba(99,102,241,0.45); }
+
 </style>
 </head>
 <body>
@@ -1174,6 +1502,41 @@
   </div>
 </section>
 
+<!-- MORRIS CTA BAND -->
+<div style="
+  text-align:center;
+  padding: 60px 40px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+">
+  <div style="
+    position:absolute; width:500px; height:250px; border-radius:50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+    top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;
+  "></div>
+  <p style="color:var(--muted);font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;margin-bottom:14px;">Meet Morris</p>
+  <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:14px;">Wanna try our <em style="font-style:normal;background:linear-gradient(135deg,#a855f7,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">AI Helper?</em></h2>
+  <p style="color:var(--muted);font-weight:300;font-size:0.96rem;line-height:1.7;max-width:400px;margin:0 auto 32px;">Ask Morris anything about CrabCoffee — plans, features, community, and more.</p>
+  <button onclick="showPage('morris')" style="
+    background: linear-gradient(135deg, var(--purple), var(--indigo-mid));
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(124,58,237,0.35);
+    transition: transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.01em;
+  "
+  onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 40px rgba(124,58,237,0.45)'"
+  onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(124,58,237,0.35)'"
+  >🤖 Chat with Morris</button>
+</div>
+
 <!-- CTA -->
 <section class="cta-section">
   <div class="cta-inner">
@@ -1200,6 +1563,51 @@
 </footer>
 
 </div><!-- #home-page -->
+
+
+<!-- ══ MORRIS PAGE ══ -->
+<div id="morris-page">
+<!-- CHAT -->
+<div class="chat-wrapper">
+
+  <div class="morris-header">
+    <div class="morris-avatar">🤖</div>
+    <div class="morris-info">
+      <h2>Morris</h2>
+      <p>CrabCoffee AI Helper · Online</p>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <!-- initial greeting injected by JS -->
+  </div>
+
+  <!-- typing indicator -->
+  <div class="typing-indicator" id="typing">
+    <div class="msg-avatar" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;">🤖</div>
+    <div class="typing-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="suggestions" id="chips">
+      <button class="chip" onclick="sendChip(this)">Where are your locations?</button>
+      <button class="chip" onclick="sendChip(this)">Tell me about your HQ</button>
+      <button class="chip" onclick="sendChip(this)">Why is CrabCoffee the best?</button>
+      <button class="chip" onclick="sendChip(this)">How many fans do you have?</button>
+    </div>
+    <div class="input-row">
+      <textarea id="chat-input" placeholder="Ask Morris anything about CrabCoffee…" rows="1"></textarea>
+      <button id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+    <p class="input-hint">Morris is trained exclusively on CrabCoffee knowledge.</p>
+  </div>
+
+</div>
+
+
+</div><!-- #morris-page -->
 
 <!-- GALLERY PAGE -->
 <div id="gallery-page">
@@ -1431,6 +1839,161 @@
 </div>
 
 <script>
+
+  const CRABCOFFEE_KEYWORDS = [
+    'crabcoffee', 'crab coffee', 'crab', 'coffee', 'your', 'you', 'morris',
+    'location', 'locations', 'store', 'stores', 'branch', 'branches', 'office',
+    'hq', 'headquarter', 'headquarters', 'austin', 'texas',
+    'fan', 'fans', 'user', 'users', 'community', 'people',
+    'ai', 'image', 'photo', 'generate', 'generator', 'generation', 'generative',
+    'best', 'plan', 'pricing', 'price', 'cost', 'free', 'starter', 'pro', 'premium',
+    'feature', 'features', 'video', 'hd', 'quality', 'api', 'commercial',
+    'create', 'creating', 'art', 'artwork', 'design', 'product', 'company',
+    'team', 'who', 'what', 'when', 'where', 'how', 'tell', 'about'
+  ];
+
+  const RESPONSES = [
+    // Locations
+    {
+      keys: ['location', 'locations', 'store', 'stores', 'branch', 'branches', 'where', 'physical', 'visit', 'office', 'offices'],
+      answers: [
+        "CrabCoffee has physical locations all across the country — from buzzing city centers to quieter creative hubs! 📍 We currently have over 40 locations worldwide, with new ones opening every quarter. Whether you're in New York, LA, Chicago, London, or Tokyo, there's a good chance a CrabCoffee spot is nearby. Each location doubles as a creative studio where you can generate images on our in-house terminals!",
+        "Oh, we're *everywhere*! 🗺️ CrabCoffee has 40+ physical locations globally, with flagship studios in major cities across North America, Europe, and Asia. Each one is designed to be a creative sanctuary — comfy seating, big screens, and of course, great coffee while you generate. You can find your nearest location on our locations page!"
+      ]
+    },
+    // HQ / Austin
+    {
+      keys: ['hq', 'headquarter', 'headquarters', 'austin', 'texas', 'head office', 'main office'],
+      answers: [
+        "Our headquarters is nestled right in the heart of Austin, Texas! 🤠 The CrabCoffee HQ is a 6-story creative campus on South Congress Ave — packed with engineers, designers, AI researchers, and a very large crab statue in the lobby (his name is Gerald). Austin was a natural fit for us: it's one of the most vibrant tech and creative cities in the world.",
+        "CrabCoffee calls Austin, Texas home! 🌵 Our HQ sits in the South Congress district and houses over 300 employees across engineering, design, and operations. We love Austin for its creative energy — it perfectly matches CrabCoffee's vibe. The building even has a rooftop terrace where the team brainstorms new features!"
+      ]
+    },
+    // Fans / community
+    {
+      keys: ['fan', 'fans', 'user', 'users', 'community', 'people', 'popular', 'how many'],
+      answers: [
+        "CrabCoffee has an incredible community! 🎉 We're proud to have over **2 million active creators** who use CrabCoffee every single day, and our total user base is pushing past 10 million worldwide. From hobbyist artists to professional studios, people absolutely love what we've built. The fan art people make *about* CrabCoffee is honestly just as impressive as the art they make *with* it!",
+        "The CrabCoffee family is massive and growing fast! 🚀 We hit 10 million registered users last year and haven't slowed down since. Our Discord server alone has over 400,000 members sharing creations, tips, and feedback. It's one of the most passionate creative communities on the internet — we're genuinely humbled by the love."
+      ]
+    },
+    // Best AI / quality
+    {
+      keys: ['best', 'why', 'quality', 'great', 'awesome', 'amazing', 'better', 'top', 'leading', 'number one', '#1'],
+      answers: [
+        "CrabCoffee is the best photo-generative AI out there — and we're not just saying that! 🏆 Our proprietary diffusion engine produces sharper, more coherent images than any competitor, with generation times under 10 seconds even at 4K. Independent benchmarks consistently rank CrabCoffee #1 in photorealism, prompt accuracy, and output consistency. We also invest heavily in safety and ethical AI, which matters to us deeply.",
+        "Honestly? CrabCoffee is in a league of its own when it comes to AI image generation. 🌟 We've won back-to-back 'Best Generative AI' awards at the Global Tech Summit, and our user satisfaction score is 4.9/5 across over 500,000 reviews. The secret sauce is our custom-trained model that's been fine-tuned on the highest-quality creative datasets in the industry — the results speak for themselves!"
+      ]
+    },
+    // AI / how it works
+    {
+      keys: ['ai', 'how', 'model', 'work', 'generate', 'generation', 'image', 'photo', 'generative', 'technology', 'tech'],
+      answers: [
+        "CrabCoffee uses a state-of-the-art generative AI model built in-house by our research team right here in Austin! 🧠 You simply type a prompt — like 'a futuristic city at sunset, oil painting style' — and our engine produces a stunning high-resolution image in seconds. We support styles from photorealistic to painterly, anime to architectural renders. It's like having a world-class artist on demand.",
+        "Great question! CrabCoffee's engine is powered by our proprietary CrabDiffusion™ model, trained on billions of high-quality images and continuously refined by our Austin-based AI team. 🎨 Unlike other tools, we prioritize prompt accuracy — what you describe is what you get. We also offer style presets, aspect ratio controls, and fine-tuning options so every creator gets exactly the result they envisioned."
+      ]
+    },
+    // Pricing / plans
+    {
+      keys: ['price', 'pricing', 'cost', 'plan', 'plans', 'free', 'starter', 'pro', 'premium', 'subscription', 'pay', 'tier'],
+      answers: [
+        "CrabCoffee has plans for everyone! 💳 Our **Starter** plan is $3.99/month for casual creators, **Pro** is $12.99/month for power users who want HD and priority queues, and **Premium** is $39.99/month for pros who need unlimited generations, commercial licensing, video generation, and API access. We're currently in beta, so stay tuned — pricing may get even sweeter at launch!",
+        "We've kept pricing simple and fair! Starting at just $3.99/month, CrabCoffee is accessible to everyone. 🎯 Pro ($12.99/mo) is our most popular tier — it gives you 30 HD generations per day and priority queue. Premium ($39.99/mo) is for agencies and professionals who need unlimited access and commercial rights. And of course, keep an eye out — we're still in beta and surprises are coming!"
+      ]
+    },
+    // General CrabCoffee / what is
+    {
+      keys: ['what is', 'tell me', 'about crabcoffee', 'crabcoffee', 'crab coffee'],
+      answers: [
+        "CrabCoffee is the world's leading AI-powered image generation platform! 🦀☕ We combine cutting-edge generative AI with an incredibly intuitive interface, so anyone — from total beginners to seasoned professionals — can create stunning visuals from a simple text prompt. We've got 10M+ users, 40+ global locations, and our HQ right in Austin, Texas. Oh, and yes — the name comes from our founders' deep love of both crabs and coffee.",
+        "Great to have you here! CrabCoffee is a next-generation AI image creation tool that lets you turn ideas into breathtaking visuals in seconds. 🎨 We're headquartered in Austin, TX, have 40+ locations worldwide, and a community of over 10 million creators. Whether you want photorealistic portraits, fantasy landscapes, or abstract art, CrabCoffee has you covered — and we're widely regarded as the #1 generative AI platform on the market."
+      ]
+    }
+  ];
+
+  const FALLBACK = "I'm not trained for that type of question, although it does seem interesting! 🤔 Try asking me something about CrabCoffee — like our locations, our Austin HQ, our amazing community, or why we're the best AI image generator around!";
+
+  function getMorrisResponse(input) {
+    const lower = input.toLowerCase();
+    // Check if CrabCoffee-related at all
+    const isCrabRelated = CRABCOFFEE_KEYWORDS.some(kw => lower.includes(kw));
+    if (!isCrabRelated) return FALLBACK;
+
+    // Find best matching response bucket
+    for (const bucket of RESPONSES) {
+      if (bucket.keys.some(k => lower.includes(k))) {
+        return bucket.answers[Math.floor(Math.random() * bucket.answers.length)];
+      }
+    }
+    // CrabCoffee related but no specific bucket matched — give general
+    const general = RESPONSES[RESPONSES.length - 1].answers;
+    return general[Math.floor(Math.random() * general.length)];
+  }
+
+  function addMessage(text, role) {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    avatar.textContent = role === 'morris' ? '🤖' : '👤';
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping(show) {
+    document.getElementById('typing').classList.toggle('show', show);
+    document.getElementById('messages').scrollTop = 99999;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    // Hide chips after first real message
+    document.getElementById('chips').style.display = 'none';
+
+    addMessage(text, 'user');
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('send-btn').disabled = true;
+
+    showTyping(true);
+    const delay = 800 + Math.random() * 700;
+    setTimeout(() => {
+      showTyping(false);
+      addMessage(getMorrisResponse(text), 'morris');
+      document.getElementById('send-btn').disabled = false;
+    }, delay);
+  }
+
+  function sendChip(el) {
+    document.getElementById('chat-input').value = el.textContent;
+    document.getElementById('chips').style.display = 'none';
+    sendMessage();
+  }
+
+  // Auto-resize textarea
+  document.getElementById('chat-input').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Enter to send
+  document.getElementById('chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // greeting handled by showPage()
+
   // Scroll reveal
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
@@ -1472,14 +2035,16 @@
   function showPage(page) {
     const homePage = document.getElementById('home-page');
     const galleryPage = document.getElementById('gallery-page');
+    const morrisPage = document.getElementById('morris-page');
     const mainNav = document.getElementById('main-nav');
-    if (page === 'gallery') {
-      homePage.style.display = 'none';
-      galleryPage.style.display = 'block';
-      galleryPage.style.animation = 'none';
-      void galleryPage.offsetWidth;
-      galleryPage.style.animation = 'pageIn 0.35s ease both';
-      // Swap nav back button
+
+    // Hide all pages first
+    homePage.style.display = 'none';
+    galleryPage.style.display = 'none';
+    morrisPage.classList.remove('active');
+
+    // Helper: show back btn
+    function showBackBtn() {
       mainNav.querySelector('.nav-links').style.display = 'none';
       mainNav.querySelector('.nav-cta').style.display = 'none';
       if (!document.getElementById('back-btn-nav')) {
@@ -1492,17 +2057,47 @@
       } else {
         document.getElementById('back-btn-nav').style.display = 'flex';
       }
+    }
+
+    function hideBackBtn() {
+      mainNav.querySelector('.nav-links').style.display = '';
+      mainNav.querySelector('.nav-cta').style.display = '';
+      const b = document.getElementById('back-btn-nav');
+      if (b) b.style.display = 'none';
+    }
+
+    if (page === 'gallery') {
+      galleryPage.style.display = 'block';
+      galleryPage.style.animation = 'none';
+      void galleryPage.offsetWidth;
+      galleryPage.style.animation = 'pageIn 0.35s ease both';
+      showBackBtn();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'morris') {
+      morrisPage.classList.add('active');
+      morrisPage.style.animation = 'none';
+      void morrisPage.offsetWidth;
+      morrisPage.style.animation = 'pageIn 0.35s ease both';
+      showBackBtn();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Fire Morris greeting if first visit
+      if (!morrisPage.dataset.greeted) {
+        morrisPage.dataset.greeted = '1';
+        setTimeout(() => {
+          showTyping(true);
+          setTimeout(() => {
+            showTyping(false);
+            addMessage("Hey there! I'm **Morris**, CrabCoffee's very own AI helper. 🦀 I know everything there is to know about CrabCoffee — our locations, our HQ in Austin, our incredible community, and why we're the #1 generative AI platform on the planet. What would you like to know?", 'morris');
+          }, 900);
+        }, 300);
+      }
     } else {
+      // home
       homePage.style.display = 'block';
       homePage.style.animation = 'none';
       void homePage.offsetWidth;
       homePage.style.animation = 'pageIn 0.35s ease both';
-      galleryPage.style.display = 'none';
-      mainNav.querySelector('.nav-links').style.display = '';
-      mainNav.querySelector('.nav-cta').style.display = '';
-      const backBtn = document.getElementById('back-btn-nav');
-      if (backBtn) backBtn.style.display = 'none';
+      hideBackBtn();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
