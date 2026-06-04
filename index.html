@@ -959,56 +959,7 @@
   #morris-page { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
   #morris-page.active { display: flex; }
 
-  :root {
-    --bg: #0a0b14;
-    --surface: #10112a;
-    --indigo: #3730a3;
-    --indigo-mid: #4f46e5;
-    --indigo-light: #6366f1;
-    --purple: #7c3aed;
-    --purple-light: #a855f7;
-    --accent: #c084fc;
-    --text: #f0f0ff;
-    --muted: #8b8cb0;
-    --border: rgba(99, 102, 241, 0.18);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* noise */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.35;
-  }
-
-  /* blobs */
-  .blob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    animation: drift 8s ease-in-out infinite alternate;
-  }
-  .blob-1 { width: 380px; height: 380px; background: rgba(79,70,229,0.13); top: 5%; left: 5%; animation-delay: 0s; }
-  .blob-2 { width: 300px; height: 300px; background: rgba(168,85,247,0.1); bottom: 10%; right: 5%; animation-delay: -3s; }
-  @keyframes drift { from { transform: translate(0,0); } to { transform: translate(25px,-15px); } }
-
-  /* ── NAV ── */
+/* ── NAV ── */
   nav {
     position: relative;
     z-index: 10;
